@@ -12,8 +12,8 @@ class Blinky(clk_freq: Int, blink_freq: Int) extends Module {
 
   out := state
 
-  val cnt = Counter(clk_freq / blink_freq)
-  when(cnt.value === cnt.n.U) {
+  val (_, wrap) = Counter(true.B, clk_freq / blink_freq)
+  when(wrap) {
     state := !state
   }
 }

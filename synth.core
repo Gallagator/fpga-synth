@@ -1,0 +1,32 @@
+CAPI=2:
+
+name: ligallag:proj:synth:0.0.1
+
+filesets:
+  pynq-z2:
+    depend: ["fusesoc:utils:generators:0.1.7"]      # generator needed for chisel
+    files:
+      - constraints/pynq_z2.xdc: { file_type: xdc }  # pin constraints file
+
+generate:
+  default-chisel:
+    generator: chisel
+    parameters: &baseparam
+      buildtool: sbt
+      extraargs: "-board bypass"
+      chiselproject: toplevel
+      copy_core: true
+      output:
+        files:
+          - generated/Top.v: { file_type: verilogSource }
+
+
+targets:
+  pynq-z2:
+    default_tool: vivado
+    description : Pynq-Z2 Zynq Z7020 Evaluation Kit
+    filesets : [pynq-z2]
+    tools:
+      vivado:
+        part : xc7z020clg400-1
+    toplevel : Top
