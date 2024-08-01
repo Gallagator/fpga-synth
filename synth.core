@@ -9,16 +9,17 @@ filesets:
       - constraints/pynq_z2.xdc: { file_type: xdc }  # pin constraints file
 
 generate:
-  default-chisel:
+  pynq-z2:
     generator: chisel
     parameters: &baseparam
       buildtool: sbt
-      extraargs: "-board bypass"
-      chiselproject: toplevel
-      copy_core: true
+      # extraargs: "-board bypass"
+      chiselproject: chisel
+      # copy_core: true
+      projectdir: chisel
       output:
         files:
-          - generated/Top.v: { file_type: verilogSource }
+          - generated/toplevel.sv: { file_type: verilogSource }
 
 
 targets:
@@ -26,7 +27,8 @@ targets:
     default_tool: vivado
     description : Pynq-Z2 Zynq Z7020 Evaluation Kit
     filesets : [pynq-z2]
+    generate : [pynq-z2]
     tools:
       vivado:
         part : xc7z020clg400-1
-    toplevel : Top
+    toplevel : TopLevel
