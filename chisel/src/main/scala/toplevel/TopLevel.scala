@@ -3,13 +3,21 @@ package top
 import chisel3._
 import blinky.Blinky
 import circt.stage.ChiselStage
+import pll.Pll
 
 class TopLevel extends Module {
   val led0 = IO(Output(Bool()))
 
-  val blinky = Module(new Blinky(125000000, 1))
+  val pll = Module(new Pll)
+  pll.io.clk_in := clock
+  pll.io.reset := reset
 
-  led0 := blinky.out
+  withClockAndReset(pll.io.clk_out, reset) {
+
+    val blinky = Module(new Blinky(50_000_000, 1))
+
+    led0 := blinky.out
+  }
 }
 
 import java.nio.file.{Paths, Files}
