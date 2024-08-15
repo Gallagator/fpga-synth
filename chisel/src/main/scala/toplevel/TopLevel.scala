@@ -8,11 +8,13 @@ import pll.Pll
 class TopLevel extends Module {
   val led0 = IO(Output(Bool()))
 
-  val pll = Module(new Pll)
+  /* Instantiate PLL for input 125MHz and output 50 MHz
+   * 50 = 125 / 5 / 17 * 34*/
+  val pll = Module(new Pll(5, 34, 17, 8.0))
   pll.io.clk_in := clock
-  pll.io.reset := reset
+  pll.io.reset := false.B
 
-  withClockAndReset(pll.io.clk_out, reset) {
+  withClockAndReset(pll.io.clk_out, false.B) {
 
     val blinky = Module(new Blinky(50_000_000, 1))
 

@@ -4,7 +4,18 @@ import chisel3._
 import xilinx.primitive.{IBUF, BUFG}
 import xilinx.primitive.series7000.PLLE2_ADV
 
-class Pll extends Module {
+/*
+ * @divclk - divider for input clock
+ * @clkfboutMult - clock multiplier
+ * @clkout0Div - clock output 0 divider
+ * @clkin1Period - period in ns of input clock
+ * */
+class Pll(
+    divclk: Int,
+    clkfboutMult: Int,
+    clkout0Div: Int,
+    clkin1Period: Double
+) extends Module {
   val io = IO(new Bundle {
     val clk_in = Input(Clock())
     val reset = Input(Bool())
@@ -18,13 +29,13 @@ class Pll extends Module {
 
   val plle2_adv = Module(
     new PLLE2_ADV(
-      divclk_divide = 5,
-      clkfbout_mult = 34,
+      divclk_divide = divclk,
+      clkfbout_mult = clkfboutMult,
       clkfbout_phase = 0.0,
-      clkout0_divide = 17,
+      clkout0_divide = clkout0Div,
       clkout0_phase = 0.0,
       clkout0_duty_cycle = 0.5,
-      clkin1_period = 8.0
+      clkin1_period = clkin1Period
     )
   )
 
