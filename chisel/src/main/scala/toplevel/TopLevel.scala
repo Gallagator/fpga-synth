@@ -4,6 +4,7 @@ import chisel3._
 import blinky.Blinky
 import circt.stage.ChiselStage
 import pll.Pll
+import riscv.regfile
 
 class TopLevel extends Module {
   val led0 = IO(Output(Bool()))
@@ -26,18 +27,23 @@ import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
 
 object Main extends App {
-  val verilog = ChiselStage.emitSystemVerilog(
-    new TopLevel(),
-    firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
-  )
-
   val folder_name = Paths.get(".", "generated")
   if (!Files.exists(folder_name)) {
     Files.createDirectory(folder_name)
   }
 
-  Files.write(
-    Paths.get(".", "generated", "toplevel.sv"),
-    verilog.getBytes(StandardCharsets.UTF_8)
-  )
+  def writeModule(gen: => RawModule, name: String) : Unit = {
+    val verilog = ChiselStage.emitSystemVerilog(
+      gen,
+      firtoolOpts = Array("-disable-all-randomization", "-strip-debug-info")
+    )
+
+    Files.write(
+      Paths.get(".", "generated", name),
+      verilog.getBytes(StandardCharsets.UTF_8)
+    )
+  }
+
+  writeModule(new TopLevel(), "toplevel.sv")
+  writeModule(new regfile.Regfile(32, 32), "regfile.sv")
 }
