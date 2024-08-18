@@ -22,5 +22,13 @@ class Regfile(numregs: Int, width: Int) extends Module {
 
   when(io.sd =/= 0.U && io.wen) {
     regs(io.sd) := io.din
+    /* Perform register file forwarding */
+    when(io.s1 === io.sd) {
+      io.rs1 := io.din
+    }
+    when(io.s2 === io.sd) {
+      io.rs2 := io.din
+    }
   }
+
 }
