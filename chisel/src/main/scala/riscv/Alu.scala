@@ -35,7 +35,7 @@ class Alu(width: Int) extends Module {
   val cout = sum(width)
 
   /* Shift ammount is 6 bits RV64I */
-  val shamt = if (width == 32) io.b(4, 0).asUInt else io.b(5, 0).asUInt
+  val shamt = io.b(log2Ceil(width) - 1, 0)
 
   switch(io.sel) {
     is(AluSel.add) {
@@ -72,15 +72,20 @@ class Alu(width: Int) extends Module {
     is(AluSel.slt) {
       when(io.out === 1.U) {
         assert(io.a.asSInt < io.b.asSInt)
+      }.otherwise {
+        assert(io.a.asSInt >= io.b.asSInt)
       }
     }
     is(AluSel.sltu) {
       when(io.out === 1.U) {
         assert(io.a < io.b)
+      }.otherwise {
+        assert(io.a >= io.b)
       }
     }
     is(AluSel.sub) (assert(io.out === io.a - io.b))
     /* Were I do do the remaining assertions, they'd be basically the same asSInt
      * the assignments. Therefore I'm leaving these out to save time. */
   }
+  assert(shamt < width.U)
 }

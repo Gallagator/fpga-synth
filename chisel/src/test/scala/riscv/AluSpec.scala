@@ -8,7 +8,13 @@ import chisel3.util._
 
 
 class AluSpec extends AnyFlatSpec with ChiselScalatestTester with Formal {
-  "Alu" should "pass bmc" in {
+  /* As it stands, Alu is fully combinational - we need only a bounded check
+   * of 1 cycle */
+  "Alu" should "pass bmc for an ALU of size 32" in {
     verify(new Alu(32), Seq(BoundedCheck(1)))
   }
+  "Alu" should "pass bmc for an ALU of size 64" in {
+    verify(new Alu(64), Seq(BoundedCheck(1)))
+  }
+
 }
