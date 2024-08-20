@@ -2,6 +2,7 @@ package riscv.regfile
 
 import chisel3._
 import chisel3.util._
+import chiseltest.formal._
 
 class RegControl(numregs: Int, width: Int) extends Bundle {
   val selectWidth = log2Ceil(numregs).W
@@ -33,4 +34,26 @@ class Regfile(numregs: Int, width: Int) extends Module {
     }
   }
 
+/* Formal */
+  assert(regs(0) === 0.U)
+
+  when(io.s1 === 0.U) {
+    assert(io.rs1 === 0.U)
+  }.otherwise {
+    when(io.s1 === io.sd && io.wen) {
+      assert(io.rs1 === io.din)
+    }
+  }
+
+  when(io.s2 === 0.U) {
+    assert(io.rs2 === 0.U)
+  }.otherwise {
+    when(io.s2 === io.sd && io.wen) {
+      assert(io.rs2 === io.din)
+    }
+  }
+
+  when(past(io.sd =/= 0.U && io.wen)) {
+    assert(regs(past(io.sd)) === past(io.din))
+  }
 }
