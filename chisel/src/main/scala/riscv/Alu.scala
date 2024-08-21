@@ -17,73 +17,77 @@ object AluSel extends ChiselEnum {
   val sra = Value("b1101".U)
 }
 
-class  AluControl(width: Int) extends Bundle {
+class AluControl(width: Int) extends Bundle {
   val a = Input(UInt(width.W))
   val b = Input(UInt(width.W))
   val sel = Input(AluSel())
+}
+
+class AluOut(width: Int) extends Bundle {
   val out = Output(UInt(width.W))
 }
 
 class Alu(width: Int) extends Module {
-  val io = IO(new AluControl(width))
+  val in = IO(new AluControl(width))
+  val out = IO(new AluOut(width))
 
-  io.out := DontCare
+  out.out := DontCare
 
   val negateb = Wire(Bool())
   negateb := DontCare
-  val sum = io.a +& Mux(negateb, ~io.b, io.b) + negateb.asUInt 
+  val sum = in.a +& Mux(negateb, ~in.b, in.b) + negateb.asUInt
   val cout = sum(width)
 
   /* Shift ammount is 6 bits RV64I */
-  val shamt = io.b(log2Ceil(width) - 1, 0)
+  val shamt = in.b(log2Ceil(width) - 1, 0)
 
-  switch(io.sel) {
+  switch(in.sel) {
     is(AluSel.add) {
       negateb := false.B
-      io.out := sum(width - 1, 0)
+      out.out := sum(width - 1, 0)
     }
     is(AluSel.slt) {
       /* Implement slt using subtraction, following is the intuition behind this 
        * muxing. In an n-bit signed number:
        * a[n-1] === b[n-1] => sum := 2^(n-1) TODO formalise this */
       negateb := true.B
-      io.out := Mux(~cout ^ io.a(width-1) ^ io.b(width-1), 1.U, 0.U)
+      out.out := Mux(~cout ^ in.a(width-1) ^ in.b(width-1), 1.U, 0.U)
     }
     is(AluSel.sltu) {
       negateb := true.B
-      io.out := Mux(cout, 0.U, 1.U)
+      out.out := Mux(cout, 0.U, 1.U)
     }
     is(AluSel.sub) {
       negateb := true.B
-      io.out := sum(width - 1, 0)
+      out.out := sum(width - 1, 0)
     }
     /* Easy ones */
-    is(AluSel.sra) (io.out := (io.a.asSInt >> shamt).asUInt)
-    is(AluSel.xor) (io.out := io.a ^ io.b)
-    is(AluSel.srl) (io.out := io.a >> shamt) 
-    is(AluSel.and) (io.out := io.a & io.b)
-    is(AluSel.sll) (io.out := io.a << shamt)
-    is(AluSel.or) (io.out := io.a | io.b)
+    is(AluSel.sra) (out.out := (in.a.asSInt >> shamt).asUInt)
+    is(AluSel.xor) (out.out := in.a ^ in.b)
+    is(AluSel.srl) (out.out := in.a >> shamt)
+    is(AluSel.and) (out.out := in.a & in.b)
+    is(AluSel.sll) (out.out := in.a << shamt)
+    is(AluSel.or) (out.out := in.a | in.b)
   }
 
 /* Formal */
-  switch(io.sel) {
-    is(AluSel.add) (assert(io.out === io.a + io.b))
+  switch(in.sel) {
+    is(AluSel.add) (assert(out.out === in.a + in.b))
     is(AluSel.slt) {
-      when(io.out === 1.U) {
-        assert(io.a.asSInt < io.b.asSInt)
+      when(out.out === 1.U) {
+        assert(in.a.asSInt < in.b.asSInt)
       }.otherwise {
-        assert(io.a.asSInt >= io.b.asSInt)
+        assert(in.a.asSInt >= in.b.asSInt)
       }
     }
     is(AluSel.sltu) {
-      when(io.out === 1.U) {
-        assert(io.a < io.b)
+      when(out.out === 1.U) {
+        assert(in.a < in.b)
       }.otherwise {
-        assert(io.a >= io.b)
+        assert(in.a >= in.b)
       }
     }
-    is(AluSel.sub) (assert(io.out === io.a - io.b))
+    is(AluSel.sub) (assert(out.out === in.a - in.b))
     /* Were I do do the remaining assertions, they'd be basically the same asSInt
      * the assignments. Therefore I'm leaving these out to save time. */
   }
