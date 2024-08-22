@@ -1,4 +1,4 @@
-package riscv.fetch
+package riscv.stage.fetch
 
 import chisel3._
 import chiseltest._

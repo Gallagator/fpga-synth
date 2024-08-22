@@ -1,4 +1,4 @@
-package riscv.regfile
+package riscv.stage.regfile
 
 import chisel3._
 import chiseltest._

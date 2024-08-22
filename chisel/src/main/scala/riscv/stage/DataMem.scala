@@ -1,4 +1,4 @@
-package riscv.datamem
+package riscv.stage.datamem
 
 import chisel3._
 import chisel3.util._
