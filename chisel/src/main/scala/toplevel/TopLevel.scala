@@ -45,5 +45,6 @@ object Main extends App {
   }
 
   writeModule(new TopLevel(), "toplevel.sv")
-  writeModule(new regfile.Regfile(32, 32), "regfile.sv")
+  // Circt can't generate the following as it doesn't support past signals yet...
+  //writeModule(new regfile.Regfile(32, 32), "regfile.sv")
 }

@@ -24,6 +24,14 @@ synth.core file and give it a fileset dependency for its constraints file
 
 ## Building:
  
+This project depends on [fusesoc-generators](https://github.com/fusesoc/fusesoc-generators)
+And so upon cloning the library needs to be added with the following
+
+``` zsh
+fusesoc library add fusesoc_utils_generators https://github.com/fusesoc/fusesoc-
+generators
+```
+
 To target the pynq-z2 board run:
 ``` zsh
 fusesoc run --target=pynq-z2 --tool=vivado ligallag:proj:synth:0.0.1
