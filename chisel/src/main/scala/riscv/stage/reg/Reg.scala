@@ -1,11 +1,11 @@
 package riscv.stage.reg
 
-import riscv.stage.regfile.Regfile
+import riscv.stage.reg.regfile.Regfile
 import chisel3._
 import chisel3.util._
 
 /* Control inputs */
-class RegStageControl(numregs: Int, width: Int) extends Bundle {
+class RegStageControl(numregs: Int) extends Bundle {
   val selectWidth = log2Ceil(numregs).W
   val s1 = Input(UInt(selectWidth))
   val s2 = Input(UInt(selectWidth))
@@ -18,7 +18,7 @@ class WbStageControl extends Bundle {
 
 /* IO */
 class RegStageIn(numregs: Int, width: Int) extends Bundle {
-  val controlReg = Input(new RegStageControl(numregs, width))
+  val controlReg = Input(new RegStageControl(numregs))
   val controlWb = Input(new WbStageControl)
   val din = Input(UInt(width.W));
 }
