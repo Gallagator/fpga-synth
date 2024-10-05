@@ -24,6 +24,36 @@ class AluIo(width: Int) extends Bundle {
   val out = Output(UInt(width.W))
 }
 
+class AluStageControl extends Bundle {
+  val sel = Input(AluSel())
+}
+
+class AluStageIn(width: Int) extends Bundle {
+  val a = Input(UInt(width.W))
+  val b = Input(UInt(width.W))
+  val aluControl = Input(new AluStageControl)
+}
+
+class AluStageOut(width: Int) extends Bundle {
+  val out = Output(UInt(width.W))
+}
+
+class AluStageIO(width: Int) extends Bundle {
+  val in = Input(new AluStageIn(width))
+  val out = Output(new AluStageOut(width))
+}
+
+class AluStage(width: Int) extends Module {
+  val io = IO(new AluStageIO(width))
+
+  val alu = new Alu(width)
+  alu.io.a := io.in.a
+  alu.io.b := io.in.b
+  alu.io.sel := io.in.aluControl.sel
+
+  io.out.out := alu.io.out
+}
+
 class Alu(width: Int) extends Module {
   val io = IO(new AluIo(width))
 

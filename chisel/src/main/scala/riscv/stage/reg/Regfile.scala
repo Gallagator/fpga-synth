@@ -15,7 +15,6 @@ class RegIo(numregs: Int, width: Int) extends Bundle {
   val rs2 = Output(UInt(width.W))
 }
 
-
 class Regfile(numregs: Int, width: Int) extends Module {
   val io = IO(new RegIo(numregs, width))
 

@@ -4,7 +4,6 @@ import chisel3._
 import blinky.Blinky
 import circt.stage.ChiselStage
 import pll.Pll
-import riscv.stage.regfile
 
 class TopLevel extends Module {
   val led0 = IO(Output(Bool()))
