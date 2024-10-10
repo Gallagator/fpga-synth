@@ -4,6 +4,7 @@ import chisel3._
 import blinky.Blinky
 import circt.stage.ChiselStage
 import pll.Pll
+import riscv.cpu.Cpu
 
 class TopLevel extends Module {
   val led0 = IO(Output(Bool()))
@@ -16,6 +17,7 @@ class TopLevel extends Module {
 
   withClockAndReset(pll.io.clk_out, false.B) {
 
+    val cpu = Module(new Cpu(32, 32, 32, "placeholder.bin"))
     val blinky = Module(new Blinky(50_000_000, 1))
 
     led0 := blinky.out

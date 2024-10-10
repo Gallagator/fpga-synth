@@ -30,9 +30,9 @@ class Fetch(width: Int, pcInit: BigInt = 0) extends Module {
     }
   }
 
-/* Formal */
-  when(past(io.stall)) {
-    stable(pc)
-  }
+/* Formal TODO fix this... */
+//  when(past(io.stall)) {
+//    stable(pc)
+//  }
   
 }
