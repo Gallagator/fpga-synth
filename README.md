@@ -5,6 +5,7 @@ through an I2S DAC - No idea how far this'll go but likely not very
 
 ## Dependencies
 
+- java
 - sbt
 - fusesoc
 - vivado
