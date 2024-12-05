@@ -29,7 +29,8 @@ class PipelineRegPassthrough[T <: Data](init: T) extends Module {
     reg := io.in
   }
 
-  io.out := reg
+  /* Output is the same as the input unless we just stalled */
+  io.out := Mux(stalled, reg, io.in);
 }
 
 class PipelineRegComb[T <: Data](init: T) extends Module {
@@ -37,7 +38,7 @@ class PipelineRegComb[T <: Data](init: T) extends Module {
 
   private val reg = RegInit(init)
 
-   when(!io.stall) {
+  when(!io.stall) {
     reg := io.in
   }
   io.out := reg
@@ -50,7 +51,7 @@ class FetchMemRequest(xlen: Int, instrWidth: Int) extends Bundle {
 
 class FetchStage(xlen: Int, instrWidth: Int) extends Module {
   val io = IO(new Bundle {
-    val instr = Decoupled(UInt(xlen.W))
+    val instr = Decoupled(UInt(instrWidth.W)) /* Instruction output */
     val memRequest = new FetchMemRequest(xlen, instrWidth)
   })
 
@@ -59,14 +60,14 @@ class FetchStage(xlen: Int, instrWidth: Int) extends Module {
   /* These will be used when branching is implemented */
   fetcher.io.pcWen := false.B
   fetcher.io.pcIn := 0.U
-  
+
   io.memRequest.addr.valid := fetcher.io.ren;
   io.memRequest.addr.bits := fetcher.io.pcOut;
 
   /* We are ready to make a memory request when the sink is ready*/
   io.memRequest.instr.ready := io.instr.ready
 
-  val instrReg = Module(new PipelineRegPassthrough(0.U(xlen.W)))
+  val instrReg = Module(new PipelineRegPassthrough(0.U(instrWidth.W)))
   instrReg.io.in := io.memRequest.instr.bits
   instrReg.io.stall := !io.instr.ready
   io.instr.valid := io.memRequest.instr.valid && io.instr.ready
@@ -75,9 +76,8 @@ class FetchStage(xlen: Int, instrWidth: Int) extends Module {
 }
 
 class Cpu(xlen: Int, instrWidth: Int, numregs: Int, programFile: String)
-  extends Module {
+    extends Module {
   require(programFile.nonEmpty)
-
 
   /* Initialise SRAM with 1 read-port for fetching and 1 read-write port for
    * load/store. Initialise the memory with the binary file with location:
@@ -88,16 +88,16 @@ class Cpu(xlen: Int, instrWidth: Int, numregs: Int, programFile: String)
 
   val fetchStage = Module(new FetchStage(xlen, instrWidth))
   /* Memory is always ready to be queried ONLY WITH SRAM WHEN CACHING THIS WILL
-   * CHANGE. 
+   * CHANGE.
    * Wire up memRequest */
-  fetchStage.io.memRequest.addr.ready := true.B 
+  fetchStage.io.memRequest.addr.ready := true.B
   mem.readPorts(0).enable := fetchStage.io.memRequest.addr.valid;
   mem.readPorts(0).address := fetchStage.io.memRequest.addr.bits;
 
   /* Memory request is valid if a read was issued last cycle. This is only the
    * case because we have a single cycle SRAM - this is subject to change */
   val readReqValid = RegInit(false.B)
-  readReqValid := mem.readPorts(0).enable 
+  readReqValid := mem.readPorts(0).enable
   fetchStage.io.memRequest.instr.bits := mem.readPorts(0).data
   fetchStage.io.memRequest.instr.valid := readReqValid
 
